@@ -132,7 +132,7 @@ ENV/
 .pytest_cache/
 
 # data
-# .data/
+.data/
 Datasets/
 mnist/
 legacy/checkpoints/
