@@ -6,7 +6,6 @@ from pytorch_lightning import LightningDataModule
 from mrc_insar_common.util.sim import gen_sim_3d
 from mrc_insar_common.util.utils import wrap
 import numpy as np
-import matplotlib.pyplot as plt
 import logging
 import glob
 import tqdm
@@ -173,7 +172,7 @@ class SpatialTemporalTestDataset(Dataset):
 
         self.ddays = np.zeros(self.stack_size)
         self.bperps = np.zeros(self.stack_size)
-
+ 
         coord = self.roi
 
         self.roi_height = self.roi[2] - self.roi[0]

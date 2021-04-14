@@ -291,10 +291,11 @@ class NewCnn(pl.LightningModule):
         he = batch['he']  # [B, 1, H, W]
         conv1 = batch['conv1']  # [B]
         conv2 = batch['conv2']  # [B]
+        # ref_out = torch.cat([mr, he], 1)  # [B, 2, H, W]
         ref_out = torch.cat([mr, he], 1)  # [B, 2, H, W]
 
         out = self.forward(filt_ifg_phase, coh, ddays,
-                           bperps)  # [B, 2, 1, 1] prediction
+                           bperps)  # [B, 2, H, W] prediction
 
         # there are two types of baseline losses but they may not work
 
