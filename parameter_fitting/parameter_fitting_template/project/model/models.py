@@ -543,11 +543,11 @@ class Exp_3(NewCnn):
         self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)  # [B,64,8,8]
 
         self.upsample1 = nn.ConvTranspose2d(
-            in_channels=64, out_channels=32, kernel_size=2, padding=0, stride=2)
+            in_channels=64, out_channels=128, kernel_size=2, padding=0, stride=2)
         self.upsample2 = nn.ConvTranspose2d(
-            in_channels=32, out_channels=16, kernel_size=2, padding=0, stride=2)
+            in_channels=128, out_channels=256, kernel_size=2, padding=0, stride=2)
         self.upsample3 = nn.ConvTranspose2d(
-            in_channels=16, out_channels=2, kernel_size=2, padding=0, stride=2)
+            in_channels=256, out_channels=self.in_channels*4, kernel_size=2, padding=0, stride=2)
 
         # call ultimate weigth init
         self.apply(weight_init)
