@@ -533,31 +533,21 @@ class Exp_3(NewCnn):
         padding = 1
 
         self.conv1 = nn.Conv2d(
-            self.in_channels*4, out_channels=512, kernel_size=kernel_size, padding=padding)
+            self.in_channels*4, out_channels=256, kernel_size=kernel_size, padding=padding)  # [B,256,64,64]
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)  # [B,256,32,32]
         self.conv2 = nn.Conv2d(
-            in_channels=512, out_channels=256, kernel_size=kernel_size, padding=padding)
-        self.conv3 = nn.Conv2d(
             in_channels=256, out_channels=128, kernel_size=kernel_size, padding=padding)
-        self.conv4 = nn.Conv2d(
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv3 = nn.Conv2d(
             in_channels=128, out_channels=64, kernel_size=kernel_size, padding=padding)
-        self.conv5 = nn.Conv2d(
-            in_channels=64, out_channels=32, kernel_size=kernel_size, padding=padding)
-        self.conv6 = nn.Conv2d(
-            in_channels=32, out_channels=16, kernel_size=kernel_size, padding=padding)
-        self.conv7 = nn.Conv2d(
-            in_channels=16, out_channels=8, kernel_size=kernel_size, padding=padding)
-        self.conv8 = nn.Conv2d(
-            in_channels=8, out_channels=4,  kernel_size=kernel_size, padding=padding)
-        self.conv9 = nn.Conv2d(
-            in_channels=4, out_channels=2,  kernel_size=kernel_size, padding=padding)
+        self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)  # [B,64,8,8]
 
-        self.bn2 = nn.BatchNorm2d(256)
-        self.bn3 = nn.BatchNorm2d(128)
-        self.bn4 = nn.BatchNorm2d(64)
-        self.bn5 = nn.BatchNorm2d(32)
-        self.bn6 = nn.BatchNorm2d(16)
-        self.bn7 = nn.BatchNorm2d(8)
-        self.bn8 = nn.BatchNorm2d(4)
+        self.upsample1 = nn.ConvTranspose2d(
+            in_channels=64, out_channels=32, kernel_size=2, padding=0, stride=2)
+        self.upsample2 = nn.ConvTranspose2d(
+            in_channels=32, out_channels=16, kernel_size=2, padding=0, stride=2)
+        self.upsample3 = nn.ConvTranspose2d(
+            in_channels=16, out_channels=2, kernel_size=2, padding=0, stride=2)
 
         # call ultimate weigth init
         self.apply(weight_init)
@@ -577,14 +567,14 @@ class Exp_3(NewCnn):
             torch.cat((filt_ifg_phase, coh, ddays, bperps), dim=1))
 
         concat_all = F.relu(self.conv1(concat_all))
-        concat_all = F.relu(self.bn2(self.conv2(concat_all)))
-        concat_all = F.relu(self.bn3(self.conv3(concat_all)))
-        concat_all = F.relu(self.bn4(self.conv4(concat_all)))
-        concat_all = F.relu(self.bn5(self.conv5(concat_all)))
-        concat_all = F.relu(self.bn6(self.conv6(concat_all)))
-        concat_all = F.relu(self.bn7(self.conv7(concat_all)))
+        concat_all = F.relu(self.pool1(concat_all))
+        concat_all = F.relu(self.conv2(concat_all))
+        concat_all = F.relu(self.pool2(concat_all))
+        concat_all = F.relu(self.conv3(concat_all))
+        concat_all = F.relu(self.pool3(concat_all))
 
-        concat_all = F.relu(self.bn8(self.conv8(concat_all)))
-        concat_all = F.relu(self.conv9(concat_all))
+        concat_all = F.relu(self.upsample1(concat_all))
+        concat_all = F.relu(self.upsample2(concat_all))
+        concat_all = F.relu(self.upsample3(concat_all))
 
         return concat_all
