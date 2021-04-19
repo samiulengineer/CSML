@@ -578,3 +578,124 @@ class Exp_3(NewCnn):
         concat_all = F.relu(self.upsample3(concat_all))
 
         return concat_all
+
+
+class RBDN(NewCnn):
+    def __init__(self,
+                 in_channels=1,
+                 lr=1e-3,
+                 loss_type='mse',
+                 *args,
+                 **kwargs):
+        super().__init__()
+        self.lr = lr
+        self.in_channels = in_channels
+        self.loss_type = loss_type
+        kernel_size = 3
+        padding = 1
+
+        self.conv_input = nn.Conv2d(
+            self.in_channels*4, out_channels=64, kernel_size=9, padding=4)
+
+        self.conv_middle = nn.Conv2d(
+            in_channels=64, out_channels=64, kernel_size=3, padding=1)
+
+        self.conv_concat = nn.Conv2d(
+            in_channels=128, out_channels=64, kernel_size=3, padding=1)
+
+        self.pooling_Layer = nn.MaxPool2d(
+            kernel_size=2, stride=2, return_indices=True)
+
+        self.unpool_layer = nn.MaxUnpool2d(kernel_size=2, stride=2)
+
+        self.deconv_layer = nn.ConvTranspose2d(
+            in_channels=64, out_channels=64, kernel_size=3, padding=1)
+
+        self.deconv_output = nn.ConvTranspose2d(
+            in_channels=64, out_channels=2, kernel_size=9, padding=4)
+
+        self.bn_layer = nn.BatchNorm2d(64)
+
+        # call ultimate weigth init
+        self.apply(weight_init)
+
+    def forward(self, filt_ifg_phase, coh, ddays, bperps):  # forward propagation
+        # def forward(self, ddays, bperps):  # forward propagation
+        ''' filt_ifg_phase and coh model design '''
+
+        [B, N, H, W] = filt_ifg_phase.shape
+
+        ddays = torch.reshape(ddays, [B, N, 1, 1]).cuda(
+        ) * torch.ones([B, N, H, W]).cuda()
+        bperps = torch.reshape(bperps, [B, N, 1, 1]).cuda(
+        ) * torch.ones([B, N, H, W]).cuda()
+
+        concat_all = F.relu(
+            torch.cat((filt_ifg_phase, coh, ddays, bperps), dim=1))
+
+        # Model data pass start
+
+        conv1 = F.relu(self.bn_layer(self.conv_input(concat_all)))
+
+        pool1, indice1 = self.pooling_Layer(conv1)
+        pool1 = F.relu(pool1)
+
+        convB11 = F.relu(self.bn_layer(self.conv_middle(pool1)))
+
+        poolB1, indiceB1 = self.pooling_Layer(convB11)
+        poolB1 = F.relu(poolB1)
+
+        convB21 = F.relu(self.bn_layer(self.conv_middle(poolB1)))
+
+        poolB2, indiceB2 = self.pooling_Layer(convB21)
+        poolB2 = F.relu(poolB2)
+
+        convB31 = F.relu(self.bn_layer(self.conv_middle(poolB2)))
+
+        poolB3, indiceB3 = self.pooling_Layer(convB31)
+        poolB3 = F.relu(poolB3)
+
+        convB32 = F.relu(self.bn_layer(self.conv_middle(poolB3)))
+
+        unpoolB3 = F.relu(self.unpool_layer(convB32, indiceB3))
+
+        deconvB31 = F.relu(self.bn_layer(self.deconv_layer(unpoolB3)))
+
+        concat_poolB2_deconv31 = torch.cat((poolB2, deconvB31), dim=1)
+
+        convB22 = F.relu(self.bn_layer(
+            self.conv_concat(concat_poolB2_deconv31)))
+
+        unpoolB2 = F.relu(self.unpool_layer(convB22, indiceB2))
+
+        deconvB21 = F.relu(self.bn_layer(self.deconv_layer(unpoolB2)))
+
+        concat_poolB1_deconvb21 = torch.cat(
+            (poolB1, deconvB21), dim=1)
+
+        convB12 = F.relu(self.bn_layer(
+            self.conv_concat(concat_poolB1_deconvb21)))
+
+        unpoolB1 = F.relu(self.unpool_layer(convB12, indiceB1))
+
+        deconvB11 = F.relu(self.bn_layer(self.deconv_layer(unpoolB1)))
+
+        concat_pool1_deconvb11 = torch.cat((pool1, deconvB11), dim=1)
+
+        conv21 = F.relu(self.bn_layer(
+            self.conv_concat(concat_pool1_deconvb11)))
+
+        conv22 = F.relu(self.bn_layer(self.conv_middle(conv21)))
+        conv23 = F.relu(self.bn_layer(self.conv_middle(conv22)))
+        conv24 = F.relu(self.bn_layer(self.conv_middle(conv23)))
+        conv25 = F.relu(self.bn_layer(self.conv_middle(conv24)))
+        conv26 = F.relu(self.bn_layer(self.conv_middle(conv25)))
+        conv27 = F.relu(self.bn_layer(self.conv_middle(conv26)))
+        conv28 = F.relu(self.bn_layer(self.conv_middle(conv27)))
+        conv29 = F.relu(self.bn_layer(self.conv_middle(conv28)))
+
+        unpool1 = F.relu(self.unpool_layer(conv29, indice1))
+
+        deconv1 = F.relu(self.deconv_output(unpool1))
+
+        return deconv1

@@ -11,6 +11,8 @@ import glob
 import tqdm
 from datetime import datetime
 import re
+import matplotlib.pyplot as plt
+
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
@@ -172,7 +174,7 @@ class SpatialTemporalTestDataset(Dataset):
 
         self.ddays = np.zeros(self.stack_size)
         self.bperps = np.zeros(self.stack_size)
- 
+
         coord = self.roi
 
         self.roi_height = self.roi[2] - self.roi[0]
@@ -261,3 +263,89 @@ class RealInSARDataModule(LightningDataModule):
                                                  drop_last=True,
                                                  pin_memory=True)
         return val_loader
+
+
+if __name__ == "__main__":
+
+    train_dataset = torch.utils.data.ConcatDataset(SpatialTemporalTrainDataset(filt_dir="/mnt/hdd1/3vG_data/3vg_parameter_fitting_data/cortez.tsx.sm_dsc.3100.500.1500.1500/ifg_hr/",
+                                                                               filt_ext=".diff.orb.statm_cor.natm.filt",
+                                                                               coh_dir="/mnt/hdd1/3vG_data/3vg_parameter_fitting_data/cortez.tsx.sm_dsc.3100.500.1500.1500/ifg_hr/",
+                                                                               coh_ext=".diff.orb.statm_cor.natm.filt.coh",
+                                                                               bperp_dir="/mnt/hdd1/3vG_data/3vg_parameter_fitting_data/cortez.tsx.sm_dsc.3100.500.1500.1500/ifg_hr/",
+                                                                               bperp_ext=".bperp",
+                                                                               ref_mr_path="/mnt/hdd1/3vG_data/3vg_parameter_fitting_data/cortez.tsx.sm_dsc.3100.500.1500.1500/fit_hr/def_fit_cmpy",
+                                                                               ref_he_path="/mnt/hdd1/3vG_data/3vg_parameter_fitting_data/cortez.tsx.sm_dsc.3100.500.1500.1500/fit_hr/hgt_fit_m",
+                                                                               conv1=-0.0110745533168,
+                                                                               conv2=-0.00122202886324,
+                                                                               width=1500,
+                                                                               height=1500,
+                                                                               sim=True,
+                                                                               name="cortez"
+                                                                               ))
+    train_dataloader = DataLoader(train_dataset,
+                                  batch_size=4,
+                                  shuffle=True,
+                                  num_workers=4,
+                                  drop_last=True,
+                                  pin_memory=True
+                                  )
+
+    for batch_idx, batch in enumerate(train_dataloader):
+
+        ''' if we want to return not in dictionary we can check in this way '''
+
+        # input_filt, coh, ddays, bperps, mr, he = batch
+        [B, N] = batch['ddays'].shape
+
+        # print(input_filt.shape)
+
+        ''' if we want to return in dictionary we can check in this way '''
+
+        print('Batch Index \t = {}'.format(batch_idx))
+        # print('Input Type \t = {}'.format(batch['input'].dtype))
+        # print('Input Shape \t = {}'.format(batch['input'].shape))
+        print('Coh Shape \t = {}'.format(batch['coh'].shape))
+        print('mr Shape \t = {}'.format(batch['mr'].shape))
+        # print(batch['mr']) # to check the output of mr
+        print('he Shape \t = {}'.format(batch['he'].shape))
+        print('ddays Shape \t = {}'.format(batch['ddays'].shape))
+        print('bperps Shape \t = {}'.format(batch['bperps'].shape))
+        print('conv1 shape \t = {}'.format(batch['conv1'].shape))
+        # print('Wrap recon phase shape = {}'.format(
+        #     batch['wrap_recon_phase'].shape))
+
+        # print(np.angle(1*np.exp(batch['input'][0][0][0]) - (batch['wrap_recon_phase'][0][0][0])))
+
+        break
+
+    ''' vsulize sample patches in a batch from train dataset'''
+
+    print('\n ---------------- mr ---------------- \n')
+    fig, axs = plt.subplots(1, 4, figsize=(8, 2))
+    input_shape = batch['mr'][0].shape  # first training example
+    # print (batch['mr'][0][0].shape)
+    for i in range(input_shape[2]):  # size of stack
+        im = axs[i].imshow(batch['mr'][0][0], cmap='jet',
+                           vmin=-np.pi, vmax=np.pi)
+        fig.colorbar(im, ax=axs[i], shrink=0.6, pad=0.05, fraction=0.046)
+        if i == 1:
+            break
+    fig.tight_layout()
+    plt.suptitle("Motion Rate Map", fontsize=14)
+    plt.savefig("/mnt/hdd1/mdsamiul/mr_real.png")
+    plt.show()
+
+    print('\n ---------------- he ---------------- \n')
+    fig, axs = plt.subplots(1, 4, figsize=(8, 2))
+    input_shape = batch['he'][0].shape  # first training example
+    # print (batch['he'][0][0].shape)
+    for i in range(input_shape[2]):  # size of stack
+        im = axs[i].imshow(batch['he'][0][0], cmap='jet',
+                           vmin=-np.pi, vmax=np.pi)
+        fig.colorbar(im, ax=axs[i], shrink=0.6, pad=0.05, fraction=0.046)
+        if i == 1:
+            break
+    fig.tight_layout()
+    plt.suptitle("Height Error Map", fontsize=14)
+    plt.savefig("/mnt/hdd1/mdsamiul/he_real.png")
+    plt.show()

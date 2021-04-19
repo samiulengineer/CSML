@@ -1,5 +1,5 @@
 defaults:
-  - model: ex_3
+  - model: rbdn
   - data: mrcg1_real_single
 pl_trainer:
   gpus: "3"
