@@ -156,6 +156,7 @@ cifar-10-batches-py
 tags
 # data
 MNIST
+BSDS300
 runs
 *trace
 

@@ -8,3 +8,13 @@
 
 
 Implements a residual learning approach to denoise an image based on the BSDS-100 Dataset. Can be directly used in Colab.
+
+
+
+# To download data in Ubuntu environment run the following code
+```bash
+
+wget https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/BSDS300-images.tgz
+tar xvzf BSDS300-images.tgz
+rm BSDS300-images.tgz
+```
