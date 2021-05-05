@@ -290,7 +290,7 @@ if __name__ == "__main__":
                                   pin_memory=True
                                   )
 
-    for batch_idx, batch in enumerate(train_dataloader):
+    for batch_idx, batch in enumerate(train_dataset):
 
         ''' if we want to return not in dictionary we can check in this way '''
 
