@@ -212,10 +212,6 @@ At first we created the model in the constructor by using nn.Linear function.
 To know about the LightningModule see the documentation: https://pytorch-lightning.readthedocs.io/en/latest/common/lightning_module.html
 
 '''
-# a = random.randint(1, 20)
-# b = random.randint(1, 20)
-
-# a, b = 10, 20
 
 
 class EqModel(pl.LightningModule):
@@ -379,7 +375,7 @@ def main():
 
     EqnSolve = EqModel()
 
-    # Here the loger saved in the lightning_logs with remaned Eqn.
+    # Here the logger saved in the lightning_logs with remaned Eqn.
     # logger = TensorBoardLogger("lightning_logs", name="Eqn", log_graph=True)
 
     # ------------
@@ -388,8 +384,7 @@ def main():
 
     trainer = pl.Trainer(max_epochs=500,
                          fast_dev_run=False,
-                         gpus="3",
-                         val_check_interval=400
+                         gpus="3"
                          )
 
     trainer.fit(model=EqnSolve, datamodule=data)
