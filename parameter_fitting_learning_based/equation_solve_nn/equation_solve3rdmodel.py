@@ -24,7 +24,6 @@ here, the eqn is y = a*x1 + b*x2
 a and b are the two constants which value are 2 and 3 respectively
 x1 and x2 also created randomly with the tensor size (stack_size,1)
 and the shape of the y is also (stack_size)
-
 N.B.: this function is used to create training random data
 """
 
@@ -51,9 +50,7 @@ here, the eqn is y = a*x1 + b*x2
 a and b are the two constants which values are 4 and 5 respectively
 x1 and x2 are also created randomly with the tensor size (stack_size,1)
 and the shape of the y is also (stack_size)
-
 N.B.: this function is used to create test random data 
-
 """
 
 
@@ -83,7 +80,6 @@ The len function returns the length of the dataset and the __getitem__ function 
 supporting to fetch a data sample for a given key.
 In the __init__ function we use the input_y function to create the randomm data for training.
 And the __getitem__ function returns the dictionary of x1,x2 and y. 
-
 '''
 
 
@@ -121,7 +117,6 @@ The len function returns the length of the dataset and the __getitem__ function 
 supporting to fetch a data sample for a given key.
 In the __init__ function we use the input_y_test function to create the randomm data for test. here we use the default stack_size 10000.
 And the __getitem__ function returns the dictionary of x1,x2 and y. 
-
 '''
 
 
@@ -156,13 +151,10 @@ class EqnTestPrepare(Dataset):
 The EqnDataLoader class which is inherited the LightningDataModule.
 A DataModule standardizes the training, val, test splits, data preparation and transforms.
 The main advantage is consistent data splits, data preparation and transforms across models.
-
 In __init__ function we split the datset for the training and test. i.e. 80% for training and 20% for the vlidation.
  
 Data loader. Combines a dataset and a sampler, and provides an iterable over the given dataset. And it tranforms the dataset in tensor.
-
 To know more about the LightningDataModule see the documention : https://pytorch-lightning.readthedocs.io/en/stable/extensions/datamodules.html
-
 '''
 
 
@@ -182,7 +174,7 @@ class EqnDataLoader(pl.LightningDataModule):
 
         train_dataloader = DataLoader(self.train_dataset,
                                       batch_size=4,
-                                      shuffle=True,
+                                      shuffle=False,
                                       num_workers=4,
                                       )
 
@@ -198,7 +190,7 @@ class EqnDataLoader(pl.LightningDataModule):
     def test_dataloader(self):
         test_loader = DataLoader(self.test_dataset,
                                  batch_size=4,
-                                 shuffle=True,
+                                 shuffle=False,
                                  num_workers=4)
         return test_loader
 
@@ -206,11 +198,8 @@ class EqnDataLoader(pl.LightningDataModule):
 '''
 this Eqmdel inherit the the LightningModule.
 the constructor takes the argumets are input_channels, learning rate and lose_type
-
 At first we created the model in the constructor by using nn.Linear function. 
-
 To know about the LightningModule see the documentation: https://pytorch-lightning.readthedocs.io/en/latest/common/lightning_module.html
-
 '''
 
 
