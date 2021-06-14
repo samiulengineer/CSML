@@ -32,9 +32,9 @@ N.B.: this function is used to create training random data
 def input_y(stack_size):
 
     x2 = torch.from_numpy(
-        np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32))
+        np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32))
     x1 = torch.from_numpy(
-        np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32))
+        np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32))
     a = torch.from_numpy(
         np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32))
     b = torch.from_numpy(
@@ -62,12 +62,12 @@ N.B.: this function is used to create test random data
 
 def input_y_test(stack_size):
 
-    x2 = torch.from_numpy(np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32)) * \
+    x2 = torch.from_numpy(np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32)) * \
         torch.from_numpy(
-            np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32)) * 2
-    x1 = torch.from_numpy(np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32)) * \
+            np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32)) * 2
+    x1 = torch.from_numpy(np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32)) * \
         torch.from_numpy(
-            np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32)) * 2
+            np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32)) * 2
     a = torch.from_numpy(np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32)) * \
         torch.from_numpy(np.random.uniform(-100, 100,
                                            (stack_size, 1)).astype(np.float32)) * 2
@@ -98,7 +98,7 @@ And the __getitem__ function returns the dictionary of x1,x2 and y.
 
 
 class EqnPrepare(Dataset):
-    def __init__(self, stack_size=500, wrap=False):
+    def __init__(self, stack_size=500, wrap=True):
 
         self.stack_size = stack_size
         self.wrap = wrap
@@ -135,7 +135,7 @@ And the __getitem__ function returns the dictionary of x1,x2 and y.
 
 
 class EqnTestPrepare(Dataset):
-    def __init__(self, stack_size=500, wrap=False):
+    def __init__(self, stack_size=500, wrap=True):
         self.wrap = wrap
         self.stack_size = stack_size
 
@@ -218,6 +218,7 @@ To know about the LightningModule see the documentation: https://pytorch-lightni
 
 
 class EqModel(pl.LightningModule):
+
     def __init__(self, in_channels=3, lr=3e-4, loss_type='ri-mse', *args, **kwargs):
         super().__init__()
         self.lr = lr

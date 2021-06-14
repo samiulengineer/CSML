@@ -32,9 +32,9 @@ N.B.: this function is used to create training random data
 
 def input_y(stack_size):
     x2 = torch.from_numpy(
-        np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32))
+        np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32))
     x1 = torch.from_numpy(
-        np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32))
+        np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32))
     # a = torch.rand((stack_size, 1))
     # b = torch.rand((stack_size, 1))
 
@@ -61,9 +61,9 @@ N.B.: this function is used to create test random data
 
 
 def input_y_test(stack_size):
-    x2 = torch.from_numpy(np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32)) * \
+    x2 = torch.from_numpy(np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32)) * \
         torch.from_numpy(
-            np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32)) * 2
+            np.random.uniform(-100, 100, (stack_size, 1)).astype(np.float32)) * 2
     x1 = torch.from_numpy(np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32)) * \
         torch.from_numpy(
             np.random.uniform(-10, 10, (stack_size, 1)).astype(np.float32)) * 2
