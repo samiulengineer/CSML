@@ -219,13 +219,13 @@ To know about the LightningModule see the documentation: https://pytorch-lightni
 
 class EqModel(pl.LightningModule):
 
-    def __init__(self, in_channels=3, lr=3e-4, loss_type='ri-mse', *args, **kwargs):
+    def __init__(self, channels=3, lr=3e-4, loss_type='ri-mse', *args, **kwargs):
         super().__init__()
         self.lr = lr
         self.loss_type = loss_type
-        self.in_channels = in_channels
+        self.channels = channels
 
-        self.L1 = nn.Linear(self.in_channels, 64)
+        self.L1 = nn.Linear(self.channels, 64)
         self.L2 = nn.Linear(64, 32)
         self.L3 = nn.Linear(32, 16)
         self.L4 = nn.Linear(16, 8)
