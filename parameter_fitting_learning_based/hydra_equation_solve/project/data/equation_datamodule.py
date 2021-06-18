@@ -280,15 +280,15 @@ class EqnDataLoader(pl.LightningDataModule):
         return train_dataloader
 
     def val_dataloader(self):
-        val_loader = DataLoader(self.val_dataset,
-                                batch_size=self.val_batch_size,
-                                shuffle=False,
-                                num_workers=self.val_num_workers)
-        return val_loader
+        val_dataloader = DataLoader(self.val_dataset,
+                                    batch_size=self.val_batch_size,
+                                    shuffle=False,
+                                    num_workers=self.val_num_workers)
+        return val_dataloader
 
     def test_dataloader(self):
-        test_loader = DataLoader(self.test_dataset,
-                                 batch_size=self.test_batch_size,
-                                 shuffle=False,
-                                 num_workers=self.test_num_workers)
-        return test_loader
+        test_dataloader = DataLoader(self.test_dataset,
+                                     batch_size=self.test_batch_size,
+                                     shuffle=False,
+                                     num_workers=self.test_num_workers)
+        return test_dataloader

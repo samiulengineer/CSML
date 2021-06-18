@@ -3,7 +3,7 @@ defaults:
   - data: train_data_eqn                                                         
 
 pl_trainer:
-  max_epochs: 500                                                                                                                                
+  max_epochs: 10                                                                                                                                
   gpus: "3"                                                                          
   val_check_interval: 100                                                           
   limit_val_batches: 5  

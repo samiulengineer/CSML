@@ -49,25 +49,32 @@ python train_equation.py \
 ### Testing
 Test with pretrained checkpoint file after training 
 
+
 ### Testing unwrapped with fixed baseline (Experiment 1)
 ```bash
-python test_equation.py \
-    model=eqnmodel12 \
-    data=test_data_eqn \
-    data.experiment=1  \
+#Recommend to use absolute path for checkpoint_path then you do not need extract $PWD
+python test_equation.py 
+       model=eqnmodel12 \
+       data=test_data_eqn 
+       data.experiment=1 \
+       checkpoint_path=$PWD'/processing/train/lightning_logs/version_0/checkpoints/epoch\=25-step\=2599.ckpt'
 ```
 
 ### Testing wrapped with fixed baseline (Experiment 2)
 ```bash
+#Recommend to use absolute path for checkpoint_path then you do not need extract $PWD
 python test_equation.py \
     model=eqnmodel12 \
     data=test_data_eqn \
     data.experiment=2 \
+    checkpoint_path = $PWD'/processing/train/lightning_logs/version_0/checkpoints/epoch\=25-step\=2599.ckpt'
 ```
 ### Testing wrapped with random baseline (Experiment 3)
 ```bash
+#Recommend to use absolute path for checkpoint_path then you do not need extract $PWD
 python test_equation.py \
-       model=eqmodel /
+       model=eqmodel \
        data=test_data_eqn \
-       data.experiment=3
+       data.experiment=3 \
+       checkpoint_path = $PWD'/processing/train/lightning_logs/version_0/checkpoints/epoch\=25-step\=2599.ckpt'
 ```
