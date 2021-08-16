@@ -32,6 +32,14 @@ python train_equation.py \
     data.experiment=1 \
 ```
 
+### Training unwrapped with fixed baseline (Experiment 1) & save the log file in text file
+```bash
+python train_equation.py \
+    model=eqnmodel12 \
+    data=train_data_eqn \
+    data.experiment=1 > processing/train/exp-1_log.txt
+```
+
 ### Training wrapped with fixed baseline (Experiment 2)
 ```bash
 python train_equation.py \
@@ -39,6 +47,15 @@ python train_equation.py \
     data=train_data_eqn \
     data.experiment=2 \
 ```
+
+### Training wrapped with fixed baseline (Experiment 2) & save the log file in text file
+```bash
+python train_equation.py \
+    model=eqnmodel12 \
+    data=train_data_eqn \
+    data.experiment=2 > processing/train/exp-2_log.txt
+```
+
 ### Training wrapped with random baseline (Default) (Experiment 3)
 ```bash
 python train_equation.py \
@@ -46,6 +63,15 @@ python train_equation.py \
     data=train_data_eqn \
     data.experiment=3 \
 ```
+
+### Training wrapped with random baseline (Default) (Experiment 3) & save the log file in text file
+```bash
+python train_equation.py \
+    model=eqmodel \
+    data=train_data_eqn \
+    data.experiment=3 > processing/train/exp-3_log.txt
+```
+
 ### Testing
 Test with pretrained checkpoint file after training 
 
