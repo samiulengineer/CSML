@@ -9,6 +9,7 @@ import logging
 
 
 logger = logging.getLogger(__name__)
+torch.set_printoptions(edgeitems=25)
 
 
 '''
@@ -68,11 +69,24 @@ class EqModel(pl.LightningModule):
         out_x1 = out[:, :, 0].unsqueeze(2)
         out_x2 = out[:, :, 1].unsqueeze(2)
 
-        recon_y = (a * out_x1) + (b * out_x2)
+        if(self.current_epoch == 9):
+
+            x1_pred = out_x1.flatten()
+            x1_gt = x1.flatten()
+            x1_diff = x1_gt-x1_pred
+            self.print(x1_pred, "x1_pred")
+            self.print(x1_gt, "x1_gt")
+            self.print(x1_diff, "x1_diff")
+
+        # recon_y = (a * out_x1) + (b * out_x2)
+        recon_y = (out_x1-a)**2 + b*(out_x2-out_x1**2)**2
+
         recon_y = torch.reshape(recon_y, [B, N, X])
 
         y_loss = F.mse_loss(recon_y, y_input)
         x_loss = F.mse_loss(out, ref_out)
+        x1_loss = F.mse_loss(out_x1, x1)
+        x2_loss = F.mse_loss(out_x2, x2)
         ri_mse = torch.square(torch.sin(y_input) - torch.sin(recon_y)) + \
             torch.square(torch.cos(y_input) - torch.cos(recon_y))
         ri_mse = ri_mse.mean()
@@ -89,7 +103,7 @@ class EqModel(pl.LightningModule):
         # mean_squared_error = torchmetrics.MeanSquaredError()
         mean_squared_error1 = mean_squared_error(out, ref_out)
         # mean_squared_log_error = torchmetrics.MeanSquaredLogError()
-        mean_squared_log_error1 = mean_squared_log_error(out, ref_out)
+        # mean_squared_log_error1 = mean_squared_log_error(out, ref_out)
         # pearson = torchmetrics.PearsonCorrcoef()
         # pearson = pearson(out, ref_out)
         # r2score = torchmetrics.R2Score()
@@ -118,6 +132,8 @@ class EqModel(pl.LightningModule):
 
         self.log('y_loss', y_loss, prog_bar=True)
         self.log('x_loss', x_loss, prog_bar=True)
+        self.log('x1_loss', x1_loss, prog_bar=True)
+        self.log('x2_loss', x2_loss, prog_bar=True)
         self.log('ri_mse', ri_mse, prog_bar=True)
         self.log('avg_x1_error', avg_x1_error, prog_bar=True)
         self.log('cosineSimilrity', cosineSimilrity, prog_bar=True)
@@ -126,8 +142,13 @@ class EqModel(pl.LightningModule):
         self.log('mean_abs_percentage_error',
                  mean_abs_percentage_error, prog_bar=True)
         self.log('mean_squared_error', mean_squared_error1, prog_bar=True)
-        self.log('mean_squared_log_error',
-                 mean_squared_log_error1, prog_bar=True)
+        # self.log('mean_squared_log_error',
+        #          mean_squared_log_error1, prog_bar=True)
+
+        # self.print(x1_pred, "x1_pred")
+        # self.print(x1_gt, "x1_gt")
+        # self.print(x1_diff, "x1_diff")
+
         # self.log('pearson', pearson, prog_bar=True)
         # self.log('r2score', r2score, prog_bar=True)
         # self.log('spearman', spearman, prog_bar=True)
@@ -135,13 +156,19 @@ class EqModel(pl.LightningModule):
         # self.log('ri_mse', ri_mse, prog_bar=True)
 
         return {
-            "loss": y_loss, "x_loss": x_loss,
-            "ri_mse": ri_mse, "avg_x1_error": avg_x1_error,
-            "cosineSimilrity": cosineSimilrity, "explained_variance": explained_variance,
+            "loss": y_loss,
+            "x_loss": x_loss,
+            "x1_loss": x1_loss,
+            "x2_loss": x2_loss,
+            "ri_mse": ri_mse,
+            "avg_x1_error": avg_x1_error,
+            "cosineSimilrity": cosineSimilrity,
+            "explained_variance": explained_variance,
             "mean_absolute_error": mean_absolute_error1,
             "mean_abs_percentage_error": mean_abs_percentage_error,
             "mean_squared_error": mean_squared_error1,
-            "mean_squared_log_error": mean_squared_log_error1,
+            # "mean_squared_log_error": mean_squared_log_error1,
+
             # "pearson": pearson,
             # "r2score": r2score,
             # "spearman": spearman,
@@ -171,7 +198,9 @@ class EqModel(pl.LightningModule):
         out_x2 = out[:, :, 1].unsqueeze(2)
 
         # calculate y by using predicted x1 and x2
-        recon_y = (a * out_x1) + (b * out_x2)
+        # recon_y = (a * out_x1) + (b * out_x2)
+        recon_y = (out_x1-a)**2 + b*(out_x2-out_x1**2)**2
+
         recon_y = torch.reshape(recon_y, [B, N, X])
 
         y_loss_val = F.mse_loss(recon_y, y_input)
@@ -192,7 +221,7 @@ class EqModel(pl.LightningModule):
         # mean_squared_error = torchmetrics.MeanSquaredError()
         mean_squared_error_val = mean_squared_error(out, ref_out)
         # mean_squared_log_error = torchmetrics.MeanSquaredLogError()
-        mean_squared_log_error_val = mean_squared_log_error(out, ref_out)
+        # mean_squared_log_error_val = mean_squared_log_error(out, ref_out)
         # pearson = torchmetrics.PearsonCorrcoef()
         # pearson_val = pearson(out, ref_out)
         # r2score = torchmetrics.R2Score()
@@ -236,8 +265,8 @@ class EqModel(pl.LightningModule):
                  mean_abs_percentage_error_val, prog_bar=True)
         self.log('mean_squared_error_val',
                  mean_squared_error_val, prog_bar=True)
-        self.log('mean_squared_log_error_val',
-                 mean_squared_log_error_val, prog_bar=True)
+        # self.log('mean_squared_log_error_val',
+        #          mean_squared_log_error_val, prog_bar=True)
         # self.log('pearson_val', pearson_val, prog_bar=True)
         # self.log('r2score_val', r2score_val, prog_bar=True)
         # self.log('spearman_val', spearman_val, prog_bar=True)
@@ -252,7 +281,7 @@ class EqModel(pl.LightningModule):
             "mean_absolute_error_val": mean_absolute_error_val,
             "mean_abs_percentage_error_val": mean_abs_percentage_error_val,
             "mean_squared_error_val": mean_squared_error_val,
-            "mean_squared_log_error_val": mean_squared_log_error_val,
+            # "mean_squared_log_error_val": mean_squared_log_error_val,
             # "pearson_val": pearson_val,
             # "r2score_val": r2score_val,
             # "spearman_val": spearman_val,
@@ -279,7 +308,9 @@ class EqModel(pl.LightningModule):
         out_x2 = out[:, :, 1].unsqueeze(2)
 
         # calculate y by using predicted x1 and x2
-        recon_y = (a * out_x1) + (b * out_x2)
+        # recon_y = (a * out_x1) + (b * out_x2)
+        recon_y = (out_x1-a)**2 + b*(out_x2-out_x1**2)**2
+
         recon_y = torch.reshape(recon_y, [B, N, X])
 
         y_loss_test = F.mse_loss(recon_y, y_input)
@@ -300,7 +331,7 @@ class EqModel(pl.LightningModule):
         # mean_squared_error = torchmetrics.MeanSquaredError()
         mean_squared_error_test = mean_squared_error(out, ref_out)
         # mean_squared_log_error = torchmetrics.MeanSquaredLogError()
-        mean_squared_log_error_test = mean_squared_log_error(out, ref_out)
+        # mean_squared_log_error_test = mean_squared_log_error(out, ref_out)
         # pearson = torchmetrics.PearsonCorrcoef()
         # pearson_test = pearson(out, ref_out)
         # r2score = torchmetrics.R2Score()
@@ -342,8 +373,8 @@ class EqModel(pl.LightningModule):
                  mean_abs_percentage_error_test, prog_bar=True)
         self.log('mean_squared_error_test',
                  mean_squared_error_test, prog_bar=True)
-        self.log('mean_squared_log_error_test',
-                 mean_squared_log_error_test, prog_bar=True)
+        # self.log('mean_squared_log_error_test',
+        #          mean_squared_log_error_test, prog_bar=True)
         # self.log('pearson_test', pearson_test, prog_bar=True)
         # self.log('r2score_test', r2score_test, prog_bar=True)
         # self.log('spearman_test', spearman_test, prog_bar=True)
@@ -357,7 +388,7 @@ class EqModel(pl.LightningModule):
             "mean_absolute_error_test": mean_absolute_error_test,
             "mean_abs_percentage_error_test": mean_abs_percentage_error_test,
             "mean_squared_error_test": mean_squared_error_test,
-            "mean_squared_log_error_test": mean_squared_log_error_test,
+            # "mean_squared_log_error_test": mean_squared_log_error_test,
             # "pearson_test": pearson_test,
             # "r2score_test": r2score_test,
             # "spearman_test": spearman_test,
@@ -403,7 +434,10 @@ class EqModel12(pl.LightningModule):
         x2 = batch["x2"]
         # a = batch["a"]
         # b = batch["b"]
-        a, b = 1, 2
+
+        # a, b = 1, 2 (for experiment 1 & 2)
+        a, b = 1, 100  # (for experiment rosenbrock)
+
         [B, N, X] = y_input.shape
 
         if(self.current_epoch == 1):
@@ -420,20 +454,35 @@ class EqModel12(pl.LightningModule):
         # loss function for y_input and recon_y
         out_x1 = out[:, :, 0].unsqueeze(2)
         out_x2 = out[:, :, 1].unsqueeze(2)
+
+        if(self.current_epoch == 9):
+            x1_pred = out_x1.flatten()
+            x1_gt = x1.flatten()
+            x1_diff = x1_gt-x1_pred
+            self.print(x1_pred, "x1_pred")
+            self.print(x1_gt, "x1_gt")
+            self.print(x1_diff, "x1_diff")
+
         # a = torch.reshape(a, [B, N, X])
         # b = torch.reshape(b, [B, N, X])
         # calculate y by using predicted x1 and x2
-        recon_y = (a * out_x1) + (b * out_x2)
+        # recon_y = (a * out_x1) + (b * out_x2)
+        recon_y = (out_x1-a)**2 + b*(out_x2-out_x1**2)**2
+
         recon_y = torch.reshape(recon_y, [B, N, X])
 
         y_loss = F.mse_loss(recon_y, y_input)
         x_loss = F.mse_loss(out, ref_out)
+        x1_loss = F.mse_loss(out_x1, x1)
+        x2_loss = F.mse_loss(out_x2, x2)
         ri_mse = torch.square(torch.sin(y_input) - torch.sin(recon_y)) + \
             torch.square(torch.cos(y_input) - torch.cos(recon_y))
         ri_mse = ri_mse.mean()
         avg_x1_error = torch.mean(torch.abs(x1-out_x1))
         cosineSimilrity = torchmetrics.CosineSimilarity()
-        cosineSimilrity = cosineSimilrity(out, ref_out)
+        # cosineSimilrity = cosineSimilrity(out, ref_out)
+        cosineSimilrity = cosineSimilrity(recon_y, y_input)
+
         explained_variance = torchmetrics.ExplainedVariance()
         explained_variance = explained_variance(out, ref_out)
         # mean_absolute_error = torchmetrics.MeanAbsoluteError()
@@ -444,7 +493,7 @@ class EqModel12(pl.LightningModule):
         # mean_squared_error = torchmetrics.MeanSquaredError()
         mean_squared_error1 = mean_squared_error(out, ref_out)
         # mean_squared_log_error = torchmetrics.MeanSquaredLogError()
-        mean_squared_log_error1 = mean_squared_log_error(out, ref_out)
+        # mean_squared_log_error1 = mean_squared_log_error(out, ref_out)
         # pearson = torchmetrics.PearsonCorrcoef()
         # pearson = pearson(out, ref_out)
         # r2score = torchmetrics.R2Score()
@@ -473,6 +522,8 @@ class EqModel12(pl.LightningModule):
 
         self.log('y_loss', y_loss, prog_bar=True)
         self.log('x_loss', x_loss, prog_bar=True)
+        self.log('x1_loss', x1_loss, prog_bar=True)
+        self.log('x2_loss', x2_loss, prog_bar=True)
         self.log('ri_mse', ri_mse, prog_bar=True)
         self.log('avg_x1_error', avg_x1_error, prog_bar=True)
         self.log('cosineSimilrity', cosineSimilrity, prog_bar=True)
@@ -481,8 +532,10 @@ class EqModel12(pl.LightningModule):
         self.log('mean_abs_percentage_error',
                  mean_abs_percentage_error, prog_bar=True)
         self.log('mean_squared_error', mean_squared_error1, prog_bar=True)
-        self.log('mean_squared_log_error',
-                 mean_squared_log_error1, prog_bar=True)
+        # self.log('mean_squared_log_error',
+        #          mean_squared_log_error1, prog_bar=True)
+        # self.log('out_x1',
+        #          out_x1, prog_bar=True)
         # self.log('pearson', pearson, prog_bar=True)
         # self.log('r2score', r2score, prog_bar=True)
         # self.log('spearman', spearman, prog_bar=True)
@@ -490,13 +543,19 @@ class EqModel12(pl.LightningModule):
         # self.log('ri_mse', ri_mse, prog_bar=True)
 
         return {
-            "loss": y_loss, "x_loss": x_loss,
-            "ri_mse": ri_mse, "avg_x1_error": avg_x1_error,
-            "cosineSimilrity": cosineSimilrity, "explained_variance": explained_variance,
+            "loss": y_loss,
+            "x_loss": x_loss,
+            "x1_loss": x1_loss,
+            "x2_loss": x2_loss,
+            "ri_mse": ri_mse,
+            "avg_x1_error": avg_x1_error,
+            "cosineSimilrity": cosineSimilrity,
+            "explained_variance": explained_variance,
             "mean_absolute_error": mean_absolute_error1,
             "mean_abs_percentage_error": mean_abs_percentage_error,
             "mean_squared_error": mean_squared_error1,
-            "mean_squared_log_error": mean_squared_log_error1,
+            # "mean_squared_log_error": mean_squared_log_error1,
+            # "out_X1": out_x1,
             # "pearson": pearson,
             # "r2score": r2score,
             # "spearman": spearman,
@@ -515,7 +574,9 @@ class EqModel12(pl.LightningModule):
         x2 = batch["x2"]  # [B, N, 1]
         # a = batch["a"]
         # b = batch["b"]
-        a, b = 1, 2
+        # a, b = 1, 2
+        a, b = 1, 100
+
         [B, N, X] = y_input.shape
 
         # loss function for out and ref_out
@@ -527,7 +588,9 @@ class EqModel12(pl.LightningModule):
         out_x2 = out[:, :, 1].unsqueeze(2)
 
         # calculate y by using predicted x1 and x2
-        recon_y = (a * out_x1) + (b * out_x2)
+        # recon_y = (a * out_x1) + (b * out_x2)
+        recon_y = (out_x1-a)**2 + b*(out_x2-out_x1**2)**2
+
         recon_y = torch.reshape(recon_y, [B, N, X])
 
         y_loss_val = F.mse_loss(recon_y, y_input)
@@ -548,7 +611,7 @@ class EqModel12(pl.LightningModule):
         # mean_squared_error = torchmetrics.MeanSquaredError()
         mean_squared_error_val = mean_squared_error(out, ref_out)
         # mean_squared_log_error = torchmetrics.MeanSquaredLogError()
-        mean_squared_log_error_val = mean_squared_log_error(out, ref_out)
+        # mean_squared_log_error_val = mean_squared_log_error(out, ref_out)
         # pearson = torchmetrics.PearsonCorrcoef()
         # pearson_val = pearson(out, ref_out)
         # r2score = torchmetrics.R2Score()
@@ -592,8 +655,8 @@ class EqModel12(pl.LightningModule):
                  mean_abs_percentage_error_val, prog_bar=True)
         self.log('mean_squared_error_val',
                  mean_squared_error_val, prog_bar=True)
-        self.log('mean_squared_log_error_val',
-                 mean_squared_log_error_val, prog_bar=True)
+        # self.log('mean_squared_log_error_val',
+        #          mean_squared_log_error_val, prog_bar=True)
         # self.log('pearson_val', pearson_val, prog_bar=True)
         # self.log('r2score_val', r2score_val, prog_bar=True)
         # self.log('spearman_val', spearman_val, prog_bar=True)
@@ -608,7 +671,7 @@ class EqModel12(pl.LightningModule):
             "mean_absolute_error_val": mean_absolute_error_val,
             "mean_abs_percentage_error_val": mean_abs_percentage_error_val,
             "mean_squared_error_val": mean_squared_error_val,
-            "mean_squared_log_error_val": mean_squared_log_error_val,
+            # "mean_squared_log_error_val": mean_squared_log_error_val,
             # "pearson_val": pearson_val,
             # "r2score_val": r2score_val,
             # "spearman_val": spearman_val,
@@ -624,7 +687,9 @@ class EqModel12(pl.LightningModule):
         x2 = batch["x2"]
         # a = batch["a"]
         # b = batch["b"]
-        a, b = 1, 2
+        # a, b = 1, 2
+        a, b = 1, 100
+
         [B, N, X] = y_input.shape
 
         # loss function for out and ref_out
@@ -635,8 +700,17 @@ class EqModel12(pl.LightningModule):
         out_x1 = out[:, :, 0].unsqueeze(2)
         out_x2 = out[:, :, 1].unsqueeze(2)
 
+        x1_pred = out_x1.flatten()
+        x1_gt = x1.flatten()
+        x1_diff = x1_gt-x1_pred
+        self.print(x1_pred, "x1_pred")
+        self.print(x1_gt, "x1_gt")
+        self.print(x1_diff, "x1_diff")
+
         # calculate y by using predicted x1 and x2
-        recon_y = (a * out_x1) + (b * out_x2)
+        # recon_y = (a * out_x1) + (b * out_x2)
+        recon_y = (out_x1-a)**2 + b*(out_x2-out_x1**2)**2
+
         recon_y = torch.reshape(recon_y, [B, N, X])
 
         y_loss_test = F.mse_loss(recon_y, y_input)
@@ -657,7 +731,7 @@ class EqModel12(pl.LightningModule):
         # mean_squared_error = torchmetrics.MeanSquaredError()
         mean_squared_error_test = mean_squared_error(out, ref_out)
         # mean_squared_log_error = torchmetrics.MeanSquaredLogError()
-        mean_squared_log_error_test = mean_squared_log_error(out, ref_out)
+        # mean_squared_log_error_test = mean_squared_log_error(out, ref_out)
         # pearson = torchmetrics.PearsonCorrcoef()
         # pearson_test = pearson(out, ref_out)
         # r2score = torchmetrics.R2Score()
@@ -699,8 +773,8 @@ class EqModel12(pl.LightningModule):
                  mean_abs_percentage_error_test, prog_bar=True)
         self.log('mean_squared_error_test',
                  mean_squared_error_test, prog_bar=True)
-        self.log('mean_squared_log_error_test',
-                 mean_squared_log_error_test, prog_bar=True)
+        # self.log('mean_squared_log_error_test',
+        #          mean_squared_log_error_test, prog_bar=True)
         # self.log('pearson_test', pearson_test, prog_bar=True)
         # self.log('r2score_test', r2score_test, prog_bar=True)
         # self.log('spearman_test', spearman_test, prog_bar=True)
@@ -714,7 +788,7 @@ class EqModel12(pl.LightningModule):
             "mean_absolute_error_test": mean_absolute_error_test,
             "mean_abs_percentage_error_test": mean_abs_percentage_error_test,
             "mean_squared_error_test": mean_squared_error_test,
-            "mean_squared_log_error_test": mean_squared_log_error_test,
+            # "mean_squared_log_error_test": mean_squared_log_error_test,
             # "pearson_test": pearson_test,
             # "r2score_test": r2score_test,
             # "spearman_test": spearman_test,

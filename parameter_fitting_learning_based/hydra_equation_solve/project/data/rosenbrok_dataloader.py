@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 """
-input_y function takes argument stack_size. 
+input_y function takes argument stack_size.
 return the 3 tensor y, x1, x2
 this function creates random values from the x1 and x2
 here, the eqn is y = a*x1 + b*x2
@@ -26,46 +26,38 @@ def input_y(stack_size, low_limit, high_limit, experiment):
     x1 = x2 = torch.from_numpy(
         np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(np.float32))
     y = np.zeros([stack_size, 1])
-    if (experiment == 1):
-        a, b = 1, 2
-        for i in range(stack_size):
-            y[i] = (a * x1[i]) + (b * x2[i])
-        y = torch.Tensor(y)
-        return y, x1, x2
-
-    elif (experiment == 2):
-        a, b = 1, 2
-        for i in range(stack_size):
-            y[i] = (a * x1[i]) + (b * x2[i])
-        y = torch.Tensor(y)
-        y = np.angle(np.exp(1j * y))
-        return y, x1, x2
-
-    elif (experiment == 3):
-        a = b = torch.from_numpy(
-            np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(np.float32))
-        for i in range(stack_size):
-            y[i] = (a[i] * x1[i]) + (b[i] * x2[i])
-        y = torch.Tensor(y)
-        y = np.angle(np.exp(1j * y))
-        return y, x1, x2, a, b
-    elif (experiment == "rosenbrock"):
+    if (experiment == "rosenbrock"):
         a, b = 1, 100
         for i in range(stack_size):
             y[i] = (x1[i]-a)**2 + b*(x2[i]-x1[i]**2)**2
         y = torch.Tensor(y)
         return y, x1, x2
+    elif (experiment == "rosenbrock2"):
+        a, b = 1, 100
+        for i in range(stack_size):
+            y[i] = (x1[i]-a)**2 + b*(x2[i]-x1[i]**2)**2
+        y = torch.Tensor(y)
+        y = np.angle(np.exp(1j * y))
+        return y, x1, x2
+    elif (experiment == "rosenbrock3"):
+        a = b = torch.from_numpy(
+            np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(np.float32))
+        for i in range(stack_size):
+            y[i] = (x1[i]-a[i])**2 + b[i]*(x2[i]-x1[i]**2)**2
+        y = torch.Tensor(y)
+        y = np.angle(np.exp(1j * y))
+        return y, x1, x2, a, b
 
 
 """
-input_y_test function takes argument stack_size. 
+input_y_test function takes argument stack_size.
 return the 3 tensor y, x1, x2
 this function creates random values from the x1 and x2. To avoid the linearity problem we multiply 2 and another random torch with same shape.
 here, the eqn is y = a*x1 + b*x2
 a and b are the two constants which values are 4 and 5 respectively
 x1 and x2 are also created randomly with the tensor size (stack_size,1)
 and the shape of the y is also (stack_size)
-N.B.: this function is used to create test random data 
+N.B.: this function is used to create test random data
 """
 
 
@@ -78,37 +70,28 @@ def input_y_test(stack_size, low_limit, high_limit, experiment):
     #         np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(np.float32)) * 2
 
     y = np.zeros([stack_size, 1])
-    if (experiment == 1):
-        a, b = 1, 2
-        for i in range(stack_size):
-            y[i] = (a * x1[i]) + (b * x2[i])
-            y = torch.Tensor(y)
-        return y, x1, x2
-
-    elif (experiment == 2):
-        a, b = 1, 2
-        for i in range(stack_size):
-            y[i] = (a * x1[i]) + (b * x2[i])
-            y = torch.Tensor(y)
-            y = np.angle(np.exp(1j * y))
-        return y, x1, x2
-
-    elif (experiment == 3):
-        a = b = torch.from_numpy(np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(
-            np.float32))
-        # * torch.from_numpy(np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(np.float32)) * 2
-
-        for i in range(stack_size):
-            y[i] = (a[i] * x1[i]) + (b[i] * x2[i])
-        y = torch.Tensor(y)
-        y = np.angle(np.exp(1j * y))
-        return y, x1, x2, a, b
-    elif (experiment == "rosenbrock"):
+    if (experiment == "rosenbrock"):
         a, b = 1, 100
         for i in range(stack_size):
             y[i] = (x1[i]-a)**2 + b*(x2[i]-x1[i]**2)**2
         y = torch.Tensor(y)
         return y, x1, x2
+    elif (experiment == "rosenbrock2"):
+        a, b = 1, 100
+        for i in range(stack_size):
+            y[i] = (x1[i]-a)**2 + b*(x2[i]-x1[i]**2)**2
+        y = torch.Tensor(y)
+        y = np.angle(np.exp(1j * y))
+        return y, x1, x2
+    elif (experiment == "rosenbrock3"):
+        a = b = torch.from_numpy(np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(
+            np.float32))
+        #  * torch.from_numpy(np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(np.float32)) * 2
+        for i in range(stack_size):
+            y[i] = (x1[i]-a[i])**2 + b[i]*(x2[i]-x1[i]**2)**2
+        y = torch.Tensor(y)
+        y = np.angle(np.exp(1j * y))
+        return y, x1, x2, a, b
 
 
 # def wrap_y(y):
@@ -121,11 +104,11 @@ The EqnPrepare class which inherited the Dataset abstract class to create the sa
 The len function returns the length of the dataset and the __getitem__ function returns the
 supporting to fetch a data sample for a given key.
 In the __init__ function we use the input_y function to create the randomm data for training.
-And the __getitem__ function returns the dictionary of x1,x2 and y. 
+And the __getitem__ function returns the dictionary of x1,x2 and y.
 '''
 
 
-class EqnPrepare(Dataset):
+class EqnPrepareRosbrock(Dataset):
     def __init__(self, stack_size=500, low_limit=-100, high_limit=100, experiment=3):
 
         self.stack_size = stack_size
@@ -147,25 +130,25 @@ class EqnPrepare(Dataset):
 
     def __getitem__(self, idx):
 
-        if(self.experiment == 1):
+        if(self.experiment == "rosenbrock"):
             self.y_input, self.x1, self.x2 = input_y(
-                self.stack_size, self.low_limit, self.high_limit, 1)
+                self.stack_size, self.low_limit, self.high_limit, "rosenbrock")
             return {
                 "x1": self.x1,
                 "x2": self.x2,
                 "y_input": self.y_input}
 
-        elif (self.experiment == 2):
+        elif (self.experiment == "rosenbrock2"):
             self.y_input, self.x1, self.x2 = input_y(
-                self.stack_size, self.low_limit, self.high_limit, 2)
+                self.stack_size, self.low_limit, self.high_limit, "rosenbrock2")
             return {
                 "x1": self.x1,
                 "x2": self.x2,
                 "y_input": self.y_input}
 
-        elif (self.experiment == 3):
+        elif (self.experiment == "rosenbrock3"):
             self.y_input, self.x1, self.x2, self.a, self.b = input_y(
-                self.stack_size, self.low_limit, self.high_limit, 3)
+                self.stack_size, self.low_limit, self.high_limit, "rosenbrock3")
             return {
                 "x1": self.x1,
                 "x2": self.x2,
@@ -173,13 +156,6 @@ class EqnPrepare(Dataset):
                 "a": self.a,
                 "b": self.b
             }
-        elif (self.experiment == "rosenbrock"):
-            self.y_input, self.x1, self.x2 = input_y(
-                self.stack_size, self.low_limit, self.high_limit, "rosenbrock")
-            return {
-                "x1": self.x1,
-                "x2": self.x2,
-                "y_input": self.y_input}
 
 
 '''
@@ -187,11 +163,11 @@ The EqnTestPrepare class which inherited the Dataset abstract class to create th
 The len function returns the length of the dataset and the __getitem__ function returns the
 supporting to fetch a data sample for a given key.
 In the __init__ function we use the input_y_test function to create the randomm data for test. here we use the default stack_size 10000.
-And the __getitem__ function returns the dictionary of x1,x2 and y. 
+And the __getitem__ function returns the dictionary of x1,x2 and y.
 '''
 
 
-class EqnTestPrepare(Dataset):
+class EqnTestPrepareRosebrock(Dataset):
     def __init__(self, stack_size=500, low_limit=-100, high_limit=100, experiment=3):
         # self.wrap = wrap
         self.stack_size = stack_size
@@ -212,25 +188,25 @@ class EqnTestPrepare(Dataset):
 
     def __getitem__(self, idx):
 
-        if(self.experiment == 1):
+        if(self.experiment == "rosenbrock"):
             self.y_input, self.x1, self.x2 = input_y_test(
-                self.stack_size, self.low_limit, self.high_limit, 1)
+                self.stack_size, self.low_limit, self.high_limit, "rosenbrock")
             return {
                 "x1": self.x1,
                 "x2": self.x2,
-                "y_input": self.y_input, }
+                "y_input": self.y_input}
 
-        elif (self.experiment == 2):
+        elif (self.experiment == "rosenbrock2"):
             self.y_input, self.x1, self.x2 = input_y_test(
-                self.stack_size, self.low_limit, self.high_limit, 2)
+                self.stack_size, self.low_limit, self.high_limit, "rosenbrock2")
             return {
                 "x1": self.x1,
                 "x2": self.x2,
-                "y_input": self.y_input, }
+                "y_input": self.y_input}
 
-        elif (self.experiment == 3):
+        elif (self.experiment == "rosenbrock3"):
             self.y_input, self.x1, self.x2, self.a, self.b = input_y_test(
-                self.stack_size, self.low_limit, self.high_limit, 3)
+                self.stack_size, self.low_limit, self.high_limit, "rosenbrock3")
             return {
                 "x1": self.x1,
                 "x2": self.x2,
@@ -238,13 +214,6 @@ class EqnTestPrepare(Dataset):
                 "a": self.a,
                 "b": self.b
             }
-        elif (self.experiment == "rosenbrock"):
-            self.y_input, self.x1, self.x2 = input_y_test(
-                self.stack_size, self.low_limit, self.high_limit, "rosenbrock")
-            return {
-                "x1": self.x1,
-                "x2": self.x2,
-                "y_input": self.y_input}
 
 
 '''
@@ -284,14 +253,14 @@ class EqnDataLoader(pl.LightningDataModule):
         self.stack_size = stack_size
 
         if train:
-            self.dataset = EqnPrepare(
+            self.dataset = EqnPrepareRosbrock(
                 stack_size=self.stack_size, experiment=self.experiment, low_limit=self.low_limit, high_limit=self.high_limit)
             train_size = int(0.8*len(self.dataset))
             val_size = len(self.dataset) - train_size
             self.train_dataset, self.val_dataset = random_split(
                 self.dataset, [train_size, val_size])
         else:
-            self.test_dataset = EqnTestPrepare(
+            self.test_dataset = EqnTestPrepareRosebrock(
                 stack_size=self.stack_size, experiment=self.experiment, low_limit=self.low_limit, high_limit=self.high_limit)
 
     def train_dataloader(self):
@@ -320,8 +289,8 @@ class EqnDataLoader(pl.LightningDataModule):
 
 
 if __name__ == "__main__":
-    train_dataset = EqnPrepare(
-        stack_size=500, experiment=1, low_limit=-100, high_limit=100)
+    train_dataset = EqnPrepareRosbrock(
+        stack_size=500, experiment="rosenbrock", low_limit=-100, high_limit=100)
 
     for batch_idx, batch in enumerate(train_dataset):
 

@@ -32,7 +32,7 @@ def main(cfg: DictConfig):
     trainer = pl.Trainer(**(cfg.pl_trainer), checkpoint_callback=True)
 
     trainer.fit(model, datamodule=data_module)
-    trainer.predict(model, datamodule=data_module)
+    # trainer.predict(model, datamodule=data_module)
 
 
 if __name__ == '__main__':
