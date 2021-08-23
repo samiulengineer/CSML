@@ -455,13 +455,13 @@ class EqModel12(pl.LightningModule):
         out_x1 = out[:, :, 0].unsqueeze(2)
         out_x2 = out[:, :, 1].unsqueeze(2)
 
-        if(self.current_epoch == 9):
-            x1_pred = out_x1.flatten()
-            x1_gt = x1.flatten()
-            x1_diff = x1_gt-x1_pred
-            self.print(x1_pred, "x1_pred")
-            self.print(x1_gt, "x1_gt")
-            self.print(x1_diff, "x1_diff")
+        # if(self.current_epoch == 49999):
+        #     x1_pred = out_x1.flatten()
+        #     x1_gt = x1.flatten()
+        #     x1_diff = x1_gt-x1_pred
+        #     self.print(x1_pred, "x1_pred")
+        #     self.print(x1_gt, "x1_gt")
+        #     self.print(x1_diff, "x1_diff")
 
         # a = torch.reshape(a, [B, N, X])
         # b = torch.reshape(b, [B, N, X])
