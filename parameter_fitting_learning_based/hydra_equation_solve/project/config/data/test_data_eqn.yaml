@@ -1,5 +1,5 @@
 # @package _group_
-_target_: data.rosenbrock_dataloader.EqnDataLoader
+_target_: data.equation_datamodule.EqnDataLoader
 test_batch_size: 4
 test_num_workers: 4
 train: False
