@@ -3,8 +3,6 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 import pytorch_lightning as pl
 from torch.utils.data.dataset import random_split
-
-
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,25 +21,36 @@ N.B.: this function is used to create training random data
 
 
 def input_y(stack_size, low_limit, high_limit, experiment):
-    x1 = x2 = torch.from_numpy(
-        np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(np.float32))
+
+    # initialize x1 and x2 with some dummy value which are uniformly distributed where the limit is -100 to 100. Also here includes low limit, but excludes high limit [low,high)
+    # the size is (stack_size,1)
+    x1 = x2 = torch.from_numpy(np.random.uniform(
+        low_limit, high_limit, (stack_size, 1)).astype(np.float32))
+
+    # initialize y as a numpy array with size of (stack_size,1)
     y = np.zeros([stack_size, 1])
+
+    # check whether the experiment 1,2 or 3
     if (experiment == 1):
+        # define two consonant a & b with value  1 and 2 respectively (it is defined based on discussion)
         a, b = 1, 2
         for i in range(stack_size):
+            # calculate y depends on x1,x2,a and b
             y[i] = (a * x1[i]) + (b * x2[i])
-        y = torch.Tensor(y)
-        return y, x1, x2
+        y = torch.Tensor(y)  # convert y to tensor
+        return y, x1, x2       # return the y, x1, x2
 
     elif (experiment == 2):
         a, b = 1, 2
         for i in range(stack_size):
             y[i] = (a * x1[i]) + (b * x2[i])
         y = torch.Tensor(y)
-        y = np.angle(np.exp(1j * y))
+        y = np.angle(np.exp(1j * y))  # wrapped the y
         return y, x1, x2
 
     elif (experiment == 3):
+        # initialize the constants a and b with some dummy value which are uniformly distributed where the limit is -100 to 100. Also here includes low limit, but excludes high limit [low,high)
+        # the size is (stack_size,1)
         a = b = torch.from_numpy(
             np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(np.float32))
         for i in range(stack_size):
@@ -49,18 +58,12 @@ def input_y(stack_size, low_limit, high_limit, experiment):
         y = torch.Tensor(y)
         y = np.angle(np.exp(1j * y))
         return y, x1, x2, a, b
-    elif (experiment == "rosenbrock"):
-        a, b = 1, 100
-        for i in range(stack_size):
-            y[i] = (x1[i]-a)**2 + b*(x2[i]-x1[i]**2)**2
-        y = torch.Tensor(y)
-        return y, x1, x2
 
 
 """
 input_y_test function takes argument stack_size. 
 return the 3 tensor y, x1, x2
-this function creates random values from the x1 and x2. To avoid the linearity problem we multiply 2 and another random torch with same shape.
+this function creates random values from the x1 and x2.
 here, the eqn is y = a*x1 + b*x2
 a and b are the two constants which values are 4 and 5 respectively
 x1 and x2 are also created randomly with the tensor size (stack_size,1)
@@ -73,11 +76,9 @@ def input_y_test(stack_size, low_limit, high_limit, experiment):
 
     x1 = x2 = torch.from_numpy(np.random.uniform(
         low_limit, high_limit, (stack_size, 1)).astype(np.float32))
-    # * \
-    #     torch.from_numpy(
-    #         np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(np.float32)) * 2
 
     y = np.zeros([stack_size, 1])
+
     if (experiment == 1):
         a, b = 1, 2
         for i in range(stack_size):
@@ -96,24 +97,11 @@ def input_y_test(stack_size, low_limit, high_limit, experiment):
     elif (experiment == 3):
         a = b = torch.from_numpy(np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(
             np.float32))
-        # * torch.from_numpy(np.random.uniform(low_limit, high_limit, (stack_size, 1)).astype(np.float32)) * 2
-
         for i in range(stack_size):
             y[i] = (a[i] * x1[i]) + (b[i] * x2[i])
         y = torch.Tensor(y)
         y = np.angle(np.exp(1j * y))
         return y, x1, x2, a, b
-    elif (experiment == "rosenbrock"):
-        a, b = 1, 100
-        for i in range(stack_size):
-            y[i] = (x1[i]-a)**2 + b*(x2[i]-x1[i]**2)**2
-        y = torch.Tensor(y)
-        return y, x1, x2
-
-
-# def wrap_y(y):
-#     wrapY = np.angle(np.exp(1j * y))
-#     return wrapY
 
 
 '''
@@ -128,11 +116,11 @@ And the __getitem__ function returns the dictionary of x1,x2 and y.
 class EqnPrepare(Dataset):
     def __init__(self, stack_size=500, low_limit=-100, high_limit=100, experiment=3):
 
-        self.stack_size = stack_size
+        self.stack_size = stack_size  # arguments handle by hydra
         # self.wrap = wrap
-        self.low_limit = low_limit
-        self.high_limit = high_limit
-        self.experiment = experiment
+        self.low_limit = low_limit  # arguments handle by hydra
+        self.high_limit = high_limit  # arguments handle by hydra
+        self.experiment = experiment  # arguments handle by hydra
 
         # if(self.wrap):
         #     self.y_input, self.x1, self.x2, self.a, self.b = input_y(
@@ -173,13 +161,6 @@ class EqnPrepare(Dataset):
                 "a": self.a,
                 "b": self.b
             }
-        elif (self.experiment == "rosenbrock"):
-            self.y_input, self.x1, self.x2 = input_y(
-                self.stack_size, self.low_limit, self.high_limit, "rosenbrock")
-            return {
-                "x1": self.x1,
-                "x2": self.x2,
-                "y_input": self.y_input}
 
 
 '''
@@ -289,10 +270,10 @@ class EqnDataLoader(pl.LightningDataModule):
             train_size = int(0.8*len(self.dataset))
             val_size = len(self.dataset) - train_size
             self.train_dataset, self.val_dataset = random_split(
-                self.dataset, [train_size, val_size])
+                self.dataset, [train_size, val_size])   # 80% for train dataset and 20% for the validation dataset
         else:
             self.test_dataset = EqnTestPrepare(
-                stack_size=self.stack_size, experiment=self.experiment, low_limit=self.low_limit, high_limit=self.high_limit)
+                stack_size=self.stack_size, experiment=self.experiment, low_limit=self.low_limit, high_limit=self.high_limit)  # create completely new dataset for test dataloader
 
     def train_dataloader(self):
 

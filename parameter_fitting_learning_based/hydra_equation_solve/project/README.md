@@ -59,7 +59,7 @@ python train_equation.py \
 ```bash
 python train_equation.py \
     model=eqnmodel12 \
-    data._target=data.rosenbrok_dataloader.EqnDataLoader \ 
+    data._target_=data.rosenbrok_dataloader.EqnDataLoader \ 
     data.high_limit=1 \
     data.low_limit=-1 \
     data=train_data_eqn \
@@ -71,7 +71,7 @@ python train_equation.py \
 ```bash
 python train_equation.py \
     model=eqnmodel12 \
-    data._target=data.rosenbrok_dataloader.EqnDataLoader \ 
+    data._target_=data.rosenbrok_dataloader.EqnDataLoader \ 
     data.high_limit=1 \
     data.low_limit=-1 \
     data=train_data_eqn \
@@ -82,7 +82,7 @@ python train_equation.py \
 ```bash
 python train_equation.py \
     model=eqmodel \
-    data._target=data.rosenbrok_dataloader.EqnDataLoader \
+    data._target_=data.rosenbrok_dataloader.EqnDataLoader \
     data.high_limit=1 \
     data.low_limit=-1 \
     data=train_data_eqn \
@@ -92,6 +92,8 @@ python train_equation.py \
 
 ### Testing
 Test with pretrained checkpoint file after training 
+
+__N.B.: Please update the checkpoint_path according to your experience checkpoints. Here I added the dummy checkpoint_path__
 
 ### Experience 01 - Unwrapped with Fixed Baseline
 
