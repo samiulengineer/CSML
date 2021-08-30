@@ -11,14 +11,16 @@ logger = logging.getLogger(__name__)
 
 
 """
-input_y function takes argument stack_size.
-return the 3 tensor y, x1, x2
-this function creates random values from the x1 and x2
-here, the eqn is y = a*x1 + b*x2
-a and b are the two constants which value are 2 and 3 respectively
+input_y function takes argument stack_size, low_limit, high_limit and the experiments.
+low_limit and high_limit used as the interval. for each experiment it needs different return so we handle the experiment here.
+return the 5 tensors y, x1, x2, a and b according to the experiment.
+this function creates random values from the x1 and x2 for all experiments and creates random constant value a and b for the experiment 3
+here, the rosenbrock eqn is y = (x1-a)**2 + b*(x2-x1**2)**2
+a and b are the two constants which value are 1 and 2 (for experiment 1 and experiment 2) respectively
 x1 and x2 also created randomly with the tensor size (stack_size,1)
-and the shape of the y is also (stack_size)
-N.B.: this function is used to create training random data
+and the shape of the y is also (stack_size,1)
+N.B.: this function is used to create training random data. for experiment 1 and 2 the constants value of a & b are 1 and 10
+N.B.: to avoid the calculation error, the low limit and the high limit was used -1 and 1. which is handled by hydra
 """
 
 
@@ -50,14 +52,16 @@ def input_y(stack_size, low_limit, high_limit, experiment):
 
 
 """
-input_y_test function takes argument stack_size.
-return the 3 tensor y, x1, x2
-this function creates random values from the x1 and x2. To avoid the linearity problem we multiply 2 and another random torch with same shape.
-here, the eqn is y = a*x1 + b*x2
-a and b are the two constants which values are 4 and 5 respectively
-x1 and x2 are also created randomly with the tensor size (stack_size,1)
-and the shape of the y is also (stack_size)
-N.B.: this function is used to create test random data
+input_y_test function takes argument stack_size, low_limit, high_limit and the experiments.
+low_limit and high_limit used as the interval. for each experiment it needs different return so we handle the experiment here.
+return the 5 tensors y, x1, x2, a and b according to the experiment.
+this function creates random values from the x1 and x2 for all experiments and creates random constant value a and b for the experiment 3
+here, the rosenbrock eqn is y = (x1-a)**2 + b*(x2-x1**2)**2
+a and b are the two constants which value are 1 and 2 (for experiment 1 and experiment 2) respectively
+x1 and x2 also created randomly with the tensor size (stack_size,1)
+and the shape of the y is also (stack_size,1)
+N.B.: this function is used to create training random data. for experiment 1 and 2 the constants value of a & b are 1 and 10
+N.B.: to avoid the calculation error, the low limit and the high limit was used -1 and 1. which is handled by hydra
 """
 
 
@@ -100,11 +104,11 @@ def input_y_test(stack_size, low_limit, high_limit, experiment):
 
 
 '''
-The EqnPrepare class which inherited the Dataset abstract class to create the sample data.
+The EqnPrepareRosbrock class which inherited the Dataset abstract class to create the sample data.
 The len function returns the length of the dataset and the __getitem__ function returns the
 supporting to fetch a data sample for a given key.
 In the __init__ function we use the input_y function to create the randomm data for training.
-And the __getitem__ function returns the dictionary of x1,x2 and y.
+And the __getitem__ function returns the dictionary of x1,x2, y, a and b according to the experiments which was given by the user. 
 '''
 
 
@@ -163,7 +167,7 @@ The EqnTestPrepare class which inherited the Dataset abstract class to create th
 The len function returns the length of the dataset and the __getitem__ function returns the
 supporting to fetch a data sample for a given key.
 In the __init__ function we use the input_y_test function to create the randomm data for test. here we use the default stack_size 10000.
-And the __getitem__ function returns the dictionary of x1,x2 and y.
+And the __getitem__ function returns the dictionary of x1,x2, y, a and b according to the experiments which was given by the user. 
 '''
 
 
