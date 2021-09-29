@@ -27,29 +27,39 @@ class EqModel(pl.LightningModule):
         self.channels = channels
 
         self.L1 = nn.Linear(self.channels, 64)
-        # self.L2 = nn.Linear(64, 32)
-        # self.L3 = nn.Linear(32, 16)
-        # self.L4 = nn.Linear(16, 8)
-        # self.L5 = nn.Linear(8, 4)
-        self.L6 = nn.Linear(64, 2)
+        self.L2 = nn.Linear(64, 32)
+        self.L3 = nn.Linear(32, 16)
+        self.L4 = nn.Linear(16, 8)
+        self.L5 = nn.Linear(8, 4)
+        self.L6 = nn.Linear(4, 2)
 
-    def forward(self, a, b):
-        y_input = torch.cat([a, b], dim=2)
-        out = self.L1(y_input)
+        self.bn2 = nn.BatchNorm1d(32)
+        self.bn3 = nn.BatchNorm1d(16) 
+        self.bn4 = nn.BatchNorm1d(8)
+        self.bn5 = nn.BatchNorm1d(4)
+
+    def forward(self, ab):
+        # y_input = torch.cat([a, b], dim=0)
+        # out = self.L1(ab)
         # out = self.L2(out)
         # out = self.L3(out)
         # out = self.L4(out)
         # out = self.L5(out)
+        # out = self.L6(out)
+
+        out = F.relu(self.L1(ab), inplace=True)
+        out = F.relu(self.bn2(self.L2(out)), inplace=True)
+        out = F.relu(self.bn3(self.L3(out)), inplace=True)
+        out = F.relu(self.bn4(self.L4(out)), inplace=True)
+        out = F.relu(self.bn5(self.L5(out)), inplace=True)
         out = self.L6(out)
 
         return out
 
     def training_step(self, batch, batch_idx):
 
-        x1 = batch["x1"]
-        x2 = batch["x2"]
-        a = batch["a"]
-        b = batch["b"]
+        ab = batch["ab"]
+        x1x2 = batch["x1x2"]
 
 
 #         if(self.current_epoch == 1):
@@ -60,20 +70,47 @@ class EqModel(pl.LightningModule):
 #             self.logger.experiment.add_graph(EqModel(), [first, second, third])
 
         # loss function for out and ref_out
-        ref_out = torch.cat([x1, x2], 2)
-        out = self.forward(a, b)
+        # ref_out = torch.cat([x1, x2], 1)
+        out = self.forward(ab)
 
         # loss function for y_input and recon_y
-        out_x1 = out[:, :, 0].unsqueeze(2)
-        out_x2 = out[:, :, 1].unsqueeze(2)
+        # out_x1 = out[:, :, 0].unsqueeze(2)
+        # out_x2 = out[:, :, 1].unsqueeze(2)
 
 
 #       recon_y = (out_x1-a)**2 + b*(out_x2-out_x1**2)**2
 #       recon_y = torch.reshape(recon_y, [B, N, X])
 
-        x1_loss = F.mse_loss(out_x1, x1)
-        x2_loss = F.mse_loss(out_x2, x2)
-        x_loss = F.mse_loss(out, ref_out)
+        x1_loss = torch.mean((out[:, 0] - x1x2[:, 0])**2)
+        x2_loss = torch.mean((out[:, 1] - x1x2[:, 1])**2)
+        loss = x1_loss + x2_loss
+
+        self.log('my_loss',
+                 loss,
+                 on_step=True,
+                 on_epoch=True,
+                 prog_bar=True,
+                 logger=True)
+
+        self.log('x1_loss',
+                 x1_loss,
+                 on_step=True,
+                 on_epoch=True,
+                 prog_bar=True,
+                 logger=True)
+
+        self.log('x2_loss',
+                 x2_loss,
+                 on_step=True,
+                 on_epoch=True,
+                 prog_bar=True,
+                 logger=True)
+
+        return loss
+
+        # x1_loss = F.mse_loss(out_x1, x1x2[:, :, 0].unsqueeze(2))
+        # x2_loss = F.mse_loss(out_x2, x1x2[:, :, 1].unsqueeze(2))
+        # x_loss = F.mse_loss(out, ref_out)
         # avg_x1_error = torch.mean(torch.abs(x1-out_x1))
         # cosineSimilrity = torchmetrics.CosineSimilarity()
         # cosineSimilrity = cosineSimilrity(out, ref_out)
@@ -119,9 +156,9 @@ class EqModel(pl.LightningModule):
         #     dif1 = torchmetrics.CosineSimilarity()
         #     loss = dif1(out, ref_out)
 
-        self.log('x1_loss', x1_loss, prog_bar=True)
-        self.log('x2_loss', x2_loss, prog_bar=True)
-        self.log('x_loss', x_loss, prog_bar=True)
+        # self.log('x1_loss', x1_loss, prog_bar=True)
+        # self.log('x2_loss', x2_loss, prog_bar=True)
+        # self.log('x_loss', x_loss, prog_bar=True)
         # self.log('avg_x1_error', avg_x1_error, prog_bar=True)
         # self.log('cosineSimilrity', cosineSimilrity, prog_bar=True)
         # self.log('explained_variance', explained_variance, prog_bar=True)
@@ -144,17 +181,17 @@ class EqModel(pl.LightningModule):
         # self.log('spearman', spearman, prog_bar=True)
         # self.log('smape', smape, prog_bar=True)
         # self.log('ri_mse', ri_mse, prog_bar=True)
-        if(self.current_epoch == 9):
-            self.print("pred_x1", torch.flatten(out_x1))
-            self.print("x1", torch.flatten(x1))
-            self.print("pred_x1", torch.flatten(out_x1))
-            self.print("x2", torch.flatten(x2))
+        # if(self.current_epoch == 9):
+        #     self.print("pred_x1", torch.flatten(out_x1))
+        #     self.print("x1", torch.flatten(x1))
+        #     self.print("pred_x2", torch.flatten(out_x2))
+        #     self.print("x2", torch.flatten(x2))
 
-        return {
-            "loss": x_loss,
-            "x1_loss": x1_loss,
-            "x2_loss": x2_loss,
-            "x_loss": x_loss,
+        # return {
+            # "loss": x1_loss,
+            # "x1_loss": x1_loss,
+            # "x2_loss": x2_loss,
+            # "x_loss": x_loss,
             # "avg_x1_error": avg_x1_error,
             # "cosineSimilrity": cosineSimilrity,
             # "explained_variance": explained_variance,
@@ -170,33 +207,47 @@ class EqModel(pl.LightningModule):
             # "r2score": r2score,
             # "spearman": spearman,
             # "smape": smape
-        }
+        # }
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), self.lr)
+        optimizer = torch.optim.AdamW(self.parameters(), self.lr)
         return optimizer
 
     def validation_step(self, batch, batch_idx):
-        x1 = batch["x1"]  # [B, N, 1]
-        x2 = batch["x2"]  # [B, N, 1]
-        a = batch["a"]
-        b = batch["b"]
+        ab = batch["ab"]  # [B, N, 1]
+        x1x2 = batch["x1x2"]  # [B, N, 1]
+
+
+        with torch.no_grad():
+            out = self.forward(ab)
+
+            x1_loss = torch.mean((out[:, 0] - x1x2[:, 0])**2)
+            x2_loss = torch.mean((out[:, 1] - x1x2[:, 1])**2)
+
+            metric_dict = {'val_x1_error': x1_loss, 'val_x2_error': x2_loss}
+
+            logger.info(metric_dict)
+
+            self.log_dict(metric_dict)
 
         # loss function for out and ref_out
-        ref_out = torch.cat([x1, x2], 2)
-        out = self.forward(a, b)
+        # ref_out = torch.cat([x1, x2], 1)
+        # out = self.forward(ab)
 
         # loss function for y_input and recon_y
-        out_x1 = out[:, :, 0].unsqueeze(2)
-        out_x2 = out[:, :, 1].unsqueeze(2)
+        # out_x1 = out[:, :, 0].unsqueeze(2)
+        # out_x2 = out[:, :, 1].unsqueeze(2)
 
-        # calculate y by using predicted x1 and x2
-        # recon_y = (out_x1-a)**2 + b*(out_x2-out_x1**2)**2
-        # recon_y = torch.reshape(recon_y, [B, N, X])
 
-        x1_loss_val = F.mse_loss(out_x1, x1)
-        x2_loss_val = F.mse_loss(out_x2, x2)
-        x_loss_val = F.mse_loss(out, ref_out)
+#       recon_y = (out_x1-a)**2 + b*(out_x2-out_x1**2)**2
+#       recon_y = torch.reshape(recon_y, [B, N, X])
+
+        # x1_loss = torch.mean((out[:, 0] - x1x2[:, 0])**2)
+        # x2_loss = torch.mean((out[:, 1] - x1x2[:, 1])**2)
+
+        # x1_loss_val = F.mse_loss(out_x1, x1x2[:, :, 0].unsqueeze(2))
+        # x2_loss_val = F.mse_loss(out_x2, x1x2[:, :, 1].unsqueeze(2))
+        # x_loss_val = F.mse_loss(out, ref_out)
         # avg_x1_error_val = torch.mean(torch.abs(x1-out_x1))
         # cosineSimilrity = torchmetrics.CosineSimilarity()
         # cosineSimilrity_val = cosineSimilrity(out, ref_out)
@@ -242,9 +293,9 @@ class EqModel(pl.LightningModule):
         #     dif1 = torchmetrics.CosineSimilarity()
         #     loss = dif1(out, ref_out)
 
-        self.log('x1_loss_val', x1_loss_val, prog_bar=True)
-        self.log('x2_loss_val', x2_loss_val, prog_bar=True)
-        self.log('x_loss_val', x_loss_val, prog_bar=True)
+        # self.log('x1_loss_val', x1_loss_val, prog_bar=True)
+        # self.log('x2_loss_val', x2_loss_val, prog_bar=True)
+        # self.log('x_loss_val', x_loss_val, prog_bar=True)
 
         # self.log('avg_x1_error_val', avg_x1_error_val, prog_bar=True)
         # self.log('cosineSimilrity_val', cosineSimilrity_val, prog_bar=True)
@@ -267,11 +318,11 @@ class EqModel(pl.LightningModule):
         # self.log('spearman_val', spearman_val, prog_bar=True)
         # self.log('smape_val', smape_val, prog_bar=True)
 
-        return {
-            "val_loss": x_loss_val,
-            "x1_loss_val": x1_loss_val,
-            "x2_loss_val": x2_loss_val,
-            "x_loss_val": x_loss_val,
+        # return {
+        #     "val_loss": x1_loss_val,
+        #     "x1_loss_val": x1_loss_val,
+        #     "x2_loss_val": x2_loss_val,
+            # "x_loss_val": x_loss_val,
             # "cosineSimilrity_val": cosineSimilrity_val,
             # "explained_variance_val": explained_variance_val,
 
@@ -286,29 +337,41 @@ class EqModel(pl.LightningModule):
             # "spearman_val": spearman_val,
             # "smape_val": smape_val
 
-        }
+        # }
 
     def test_step(self, batch, batch_idx):
-        x1 = batch["x1"]
-        x2 = batch["x2"]
-        a = batch["a"]
-        b = batch["b"]
+        ab = batch["ab"]
+        x1x2 = batch["x1x2"]
 
         # loss function for out and ref_out
-        ref_out = torch.cat([x1, x2], 2)
-        out = self.forward(a, b)
+        # ref_out = torch.cat([x1, x2], 1)
+        out = self.forward(ab)
+
+        with torch.no_grad():
+            out = self.forward(ab)
+
+            x1_loss = torch.mean((out[:, 0] - x1x2[:, 0])**2)
+            x2_loss = torch.mean((out[:, 1] - x1x2[:, 1])**2)
+
+            metric_dict = {'test_x1_error': x1_loss, 'test_x2_error': x2_loss}
+
+            logger.info(metric_dict)
+
+            self.log_dict(metric_dict)
+
+        return (x1_loss + x2_loss).detach().cpu().numpy()
 
         # loss function for y_input and recon_y
-        out_x1 = out[:, :, 0].unsqueeze(2)
-        out_x2 = out[:, :, 1].unsqueeze(2)
+        # out_x1 = out[:, 0]
+        # out_x2 = out[:, 1]
 
         # calculate y by using predicted x1 and x2
         # recon_y = (out_x1-a)**2 + b*(out_x2-out_x1**2)**2
         # recon_y = torch.reshape(recon_y, [B, N, X])
 
-        x1_loss_test = F.mse_loss(out_x1, x1)
-        x2_loss_test = F.mse_loss(out_x2, x2)
-        x_loss_test = F.mse_loss(out, ref_out)
+        # x1_loss_test = F.mse_loss(out_x1, x1x2[:, 0])
+        # x2_loss_test = F.mse_loss(out_x2, x1x2[:, 1])
+        # x_loss_test = F.mse_loss(out, ref_out)
 
         # avg_x1_error_test = torch.mean(torch.abs(x1-out_x1))
         # cosineSimilrity = torchmetrics.CosineSimilarity()
@@ -355,9 +418,9 @@ class EqModel(pl.LightningModule):
         #     dif1 = torchmetrics.CosineSimilarity()
         #     loss = dif1(out, ref_out)
 
-        self.log('x1_loss_test', x1_loss_test, prog_bar=True)
-        self.log('x2_loss_test', x2_loss_test, prog_bar=True)
-        self.log('x_loss_test', x_loss_test, prog_bar=True)
+        # self.log('x1_loss_test', x1_loss_test, prog_bar=True)
+        # self.log('x2_loss_test', x2_loss_test, prog_bar=True)
+        # self.log('x_loss_test', x_loss_test, prog_bar=True)
 
         # self.log('avg_x1_error_test', avg_x1_error_test, prog_bar=True)
         # self.log('cosineSimilrity_test', cosineSimilrity_test, prog_bar=True)
@@ -381,11 +444,11 @@ class EqModel(pl.LightningModule):
         # self.log('smape_test', smape_test, prog_bar=True)
         # self.log('ri_mse', ri_mse, prog_bar=True)
 
-        return {
-            "test_loss": x_loss_test,
-            "x1_loss_test": x1_loss_test,
-            "x2_loss_test": x2_loss_test,
-            "x_loss_test": x_loss_test,
+        # return {
+        #     "test_loss": x1_loss_test,
+        #     "x1_loss_test": x1_loss_test,
+        #     "x2_loss_test": x2_loss_test,
+            # "x_loss_test": x_loss_test,
             # "avg_x1_error_test": avg_x1_error_test,
             # "cosineSimilrity_test": cosineSimilrity_test,
             # "explained_variance_test": explained_variance_test,
@@ -401,4 +464,4 @@ class EqModel(pl.LightningModule):
             # "spearman_test": spearman_test,
             # 'smape_test': smape_test
 
-        }
+        # }

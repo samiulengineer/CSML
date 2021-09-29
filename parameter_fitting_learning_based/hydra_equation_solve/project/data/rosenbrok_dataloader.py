@@ -109,7 +109,7 @@ The EqnPrepareRosbrock class which inherited the Dataset abstract class to creat
 The len function returns the length of the dataset and the __getitem__ function returns the
 supporting to fetch a data sample for a given key.
 In the __init__ function we use the input_y function to create the randomm data for training.
-And the __getitem__ function returns the dictionary of x1,x2, y, a and b according to the experiments which was given by the user. 
+And the __getitem__ function returns the dictionary of x1,x2, y, a and b according to the experiments which was given by the user.
 '''
 
 
@@ -122,21 +122,35 @@ class EqnPrepareRosbrock(Dataset):
         return len(self.data_frame)
 
     def __getitem__(self, idx):
-        self.a = torch.tensor(
-            self.data_frame.iloc[:, 0].values, dtype=torch.float32)
-        self.b = torch.tensor(
-            self.data_frame.iloc[:, 1].values, dtype=torch.float32)
-        self.x1 = torch.tensor(
-            self.data_frame.iloc[:, 2].values, dtype=torch.float32)
-        self.x2 = torch.tensor(
-            self.data_frame.iloc[:, 3].values, dtype=torch.float32)
+        # data = self.data_frame.iloc[idx]
+        # self.a = torch.tensor(
+        #     self.data_frame.iloc[:, 0].values, dtype=torch.float32)
+        # self.b = torch.tensor(
+        #     self.data_frame.iloc[:, 1].values, dtype=torch.float32)
+        # self.x1 = torch.tensor(
+        #     self.data_frame.iloc[:, 2].values, dtype=torch.float32)
+        # self.x2 = torch.tensor(
+        #     self.data_frame.iloc[:, 3].values, dtype=torch.float32)
 
         return {
-            "x1": self.x1.reshape((10000, 1)),
-            "x2": self.x2.reshape((10000, 1)),
-            "a": self.a.reshape((10000, 1)),
-            "b": self.b.reshape((10000, 1))
+            "ab": self.data_frame.iloc[:, :2].values.astype(np.float32),
+            "x1x2": self.data_frame.iloc[:, 2:].values.astype(np.float32)
+            # "b": self.b.reshape((10000, 1))
         }
+#     def __init__(self, npz_path, data_range, *args, **kwargs):
+#         self.data = np.load(npz_path)['db'][data_range[0]:data_range[1]]
+#
+#     def __len__(self):
+#         return len(self.data)
+#
+#     def __getitem__(self, index):
+#         entry = self.data[index]
+#
+#         return {
+#             'input': entry[:2].astype(np.float32),
+#             'output': entry[2:].astype(np.float32)
+#         }
+#
 
 
 '''
@@ -144,7 +158,7 @@ The EqnTestPrepare class which inherited the Dataset abstract class to create th
 The len function returns the length of the dataset and the __getitem__ function returns the
 supporting to fetch a data sample for a given key.
 In the __init__ function we use the input_y_test function to create the randomm data for test. here we use the default stack_size 10000.
-And the __getitem__ function returns the dictionary of x1,x2, y, a and b according to the experiments which was given by the user. 
+And the __getitem__ function returns the dictionary of x1,x2, y, a and b according to the experiments which was given by the user.
 '''
 
 
@@ -171,13 +185,73 @@ The EqnDataLoader class which is inherited the LightningDataModule.
 A DataModule standardizes the training, val, test splits, data preparation and transforms.
 The main advantage is consistent data splits, data preparation and transforms across models.
 In __init__ function we split the datset for the training and test. i.e. 80% for training and 20% for the vlidation.
- 
+
 Data loader. Combines a dataset and a sampler, and provides an iterable over the given dataset. And it tranforms the dataset in tensor.
 To know more about the LightningDataModule see the documention : https://pytorch-lightning.readthedocs.io/en/stable/extensions/datamodules.html
 '''
 
 
 class EqnDataLoader(pl.LightningDataModule):
+    #      def __init__(self,
+    #                  train_batch_size=1,
+    #                  val_batch_size=1,
+    #                  test_batch_size=1,
+    #                  train_num_workers=4,
+    #                  val_num_workers=4,
+    #                  test_num_workers=4,
+    #                  data_dir='',
+    #                  train=True,
+    #                  *args,
+    #                  **kwargs):
+    #         super().__init__(*args, **kwargs)
+    #         self.train_batch_size = train_batch_size
+    #         self.val_batch_size = val_batch_size
+    #         self.test_batch_size = test_batch_size
+    #         self.train_num_workers = train_num_workers
+    #         self.val_num_workers = val_num_workers
+    #         self.test_num_workers = test_num_workers
+    #
+    #         if (train):
+    #             self.train_dataset = EqnPrepareRosbrock(data_dir, [0, 8000])
+    #             self.val_dataset = EqnPrepareRosbrock(data_dir, [8000, 9000])
+    #             logger.info(
+    #                 f'len of train examples {len(self.train_dataset)}, len of val examples {len(self.val_dataset)}'
+    #             )
+    #         else:
+    #             self.test_dataset = EqnPrepareRosbrock(data_dir, [9000, 10000])
+    #
+    #     def train_dataloader(self):
+    #         train_loader = torch.utils.data.DataLoader(
+    #             self.train_dataset,
+    #             batch_size=self.train_batch_size,
+    #             shuffle=True,
+    #             num_workers=self.train_num_workers,
+    #             drop_last=True,
+    #             pin_memory=True,
+    #             worker_init_fn=worker_init_fn)
+    #         return train_loader
+    #
+    #     def val_dataloader(self):
+    #         val_loader = torch.utils.data.DataLoader(
+    #             self.val_dataset,
+    #             batch_size=self.val_batch_size,
+    #             shuffle=False,
+    #             num_workers=self.val_num_workers,
+    #             drop_last=True,
+    #             pin_memory=True,
+    #             worker_init_fn=worker_init_fn)
+    #         return val_loader
+    #
+    #     def test_dataloader(self):
+    #         test_loader = torch.utils.data.DataLoader(
+    #             self.test_dataset,
+    #             batch_size=self.test_batch_size,
+    #             shuffle=False,
+    #             num_workers=self.test_num_workers,
+    #             drop_last=False,
+    #             pin_memory=True,
+    #             worker_init_fn=worker_init_fn)
+    #         return test_loader
     def __init__(self, train=True,
                  train_batch_size=4,
                  val_batch_size=4,
@@ -256,6 +330,6 @@ if __name__ == "__main__":
         # print('Input Shape \t = {}'.format(batch['input'].shape))
         # print('x1 Shape \t = {}'.format(batch['x1']))
         # {batch_size, stack, 1}
-        print('x2 Shape \t = {}'.format(batch['a'].shape))
+        print('x2 Shape \t = {}'.format(batch['x1x2'].shape))
 
         break

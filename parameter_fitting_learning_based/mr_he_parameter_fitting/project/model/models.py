@@ -211,7 +211,7 @@ class NewCnn(pl.LightningModule):
             in_channels=4, out_channels=1, kernel_size=3, padding=1)
 
         self.bn1 = nn.BatchNorm2d(64)
-        self.bn2 = nn.BatchNorm2d(64)
+        self.bn2 = nn.BatchNorm2d(64) 
         self.bn3 = nn.BatchNorm2d(64)
         self.bn4 = nn.BatchNorm2d(64)
         self.bn5 = nn.BatchNorm2d(64)
