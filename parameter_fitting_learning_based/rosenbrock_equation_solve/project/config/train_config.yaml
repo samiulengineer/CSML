@@ -1,5 +1,4 @@
 defaults:
-  - _self_
   - model: poc_fc
   - data: poc_pf
 pl_trainer:

@@ -5,4 +5,4 @@ val_batch_size: 32
 train_num_workers: 4
 val_num_workers: 4
 train: True
-data_dir: /home/asun/codes/crd/dl-optimizer-poc/project/db.npz
+data_dir: /home/mdsamiul/InSAR-Coding/parameter_fitting_learning_based/alvin_equation_solve/project/data/db.npz

@@ -158,6 +158,7 @@ tags
 MNIST
 BSDS300
 runs
+db.npz
 *trace
 
 # /project/processing/
