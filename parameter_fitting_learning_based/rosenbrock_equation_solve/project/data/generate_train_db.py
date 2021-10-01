@@ -7,9 +7,9 @@ def rosen(a,b,x):
 
 def main():
     x0 = np.array([0, 0])
-    data = np.zeros([10000, 4])
+    data = np.zeros([1000000, 4])
     count = 0
-    while (count < 10000):
+    while (count < 1000000):
         a = np.random.uniform(-10,10)
         b = np.random.uniform(-10,10)
         def f(x):
