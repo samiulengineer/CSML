@@ -158,6 +158,7 @@ tags
 MNIST
 BSDS300
 runs
+Aerial_Image
 db.npz
 *trace
 

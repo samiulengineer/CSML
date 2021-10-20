@@ -51,13 +51,13 @@ class POCDataModule(LightningDataModule):
         self.test_num_workers = test_num_workers
 
         if (train):
-            self.train_dataset = POCDataset(data_dir, [0, 8000])
-            self.val_dataset = POCDataset(data_dir, [8000, 9000])
+            self.train_dataset = POCDataset(data_dir, [0, 800000])
+            self.val_dataset = POCDataset(data_dir, [800000, 900000])
             logger.info(
                 f'len of train examples {len(self.train_dataset)}, len of val examples {len(self.val_dataset)}'
             )
         else:
-            self.test_dataset = POCDataset(data_dir, [9000, 10000])
+            self.test_dataset = POCDataset(data_dir, [900000, 1000000])
 
     def train_dataloader(self):
         train_loader = torch.utils.data.DataLoader(
